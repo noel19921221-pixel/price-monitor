@@ -2,9 +2,7 @@ name: 価格監視チェック
 
 on:
   schedule:
-    # 30分ごとに実行（UTC基準 → 日本時間は+9時間）
     - cron: "0,30 * * * *"
-  # 手動実行も可能にする（テスト用）
   workflow_dispatch:
 
 jobs:
@@ -12,21 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # リポジトリのコードを取得
       - name: コードをチェックアウト
         uses: actions/checkout@v4
 
-      # Pythonをセットアップ
       - name: Python 3.11 をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 必要なライブラリをインストール
       - name: ライブラリをインストール
         run: pip install -r requirements.txt
 
-      # 価格履歴ファイルをキャッシュから復元
       - name: 価格履歴を復元
         uses: actions/cache@v4
         with:
@@ -35,13 +29,11 @@ jobs:
           restore-keys: |
             prices-cache-
 
-      # メインスクリプトを実行
       - name: 価格チェック実行
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python checker.py
 
-      # 更新された価格履歴をキャッシュに保存
       - name: 価格履歴を保存
         uses: actions/cache/save@v4
         if: always()
